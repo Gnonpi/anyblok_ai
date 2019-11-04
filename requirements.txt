@@ -1,0 +1,4 @@
+Anyblok==0.22.5
+anyblok-mixins==1.0.0
+psycopg2==2.8.4
+scikit-learn==0.21.3

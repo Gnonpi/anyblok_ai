@@ -2,36 +2,18 @@
 
 A Blok that allows to add/update/delete/use machine learning models
 
-## Installation
-
-Make sure to have the `pyproject.toml` for the dev dependencies and all,
-and the `setup.py` that link the package to AnyBlok.
-I'm not 100% sure why the `setup.py` is mandatory.
-
-Then just: 
-```
-$ poetry install
-```
-
-If you wanna install for production:
-```
-$ poetry install --no-dev
-```
-
-## Running tests
-
-```
-$ poetry run pytest
-```
-
 ## TODO
 
-* [ ] f
-* [ ] f
-* [ ] f
-* [ ] f
-* [ ] f
-* [ ] f
+Mandatory:
+* [ ] Make the PredictionModels.predict method work
+* [ ] Make the predict method create in/out records with ml_features
+* [ ] Test everything
+
+Good to have:
+* [ ] More ML libraries supported
+* [ ] Mechanism to add models: link executable
+* [ ] Remove mandatory scikit-learn dependency
+
 
 ### To make everything work
 
@@ -55,16 +37,16 @@ logging_configfile = logging.cfg
 
 Then update the DB with the mlmodels blok:
 ```
-$ poetry run python setup.py install
-$ poetry run anyblok_updatedb -c test.cfg
-$ poetry run pytest
+$ python setup.py install
+$ anyblok_updatedb -c test.cfg
+$ pytest
 ```
 
 If you made changes to your models
 (maybe just add models?),
 you have to relaunch:
 ```
-$ poetry run python setup.py install
+$ python setup.py install
 ```
 
 --- 
