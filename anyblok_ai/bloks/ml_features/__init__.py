@@ -9,7 +9,7 @@ class MachineLearningFeaturesBlok(Blok):
     """
     version = "0.1.0"
     author = "Denis Viviès"
-    required = ['anyblok-core', 'anyblok-mixins']
+    required = ['mlmodels']
 
     @classmethod
     def import_declaration_module(cls):

@@ -1,10 +1,16 @@
 import datetime
+from logging import getLogger
 
 from anyblok import Declarations
 from anyblok.column import String, Integer, Boolean, DateTime
 from anyblok.relationship import Many2One, One2One
 
-from bloks.ml_models.prediction_models import Model, Mixin, PredictionModel
+from anyblok_ai.bloks.ml_models.prediction_models import PredictionModel
+
+logger = getLogger(__name__)
+
+Model = Declarations.Model
+Mixin = Declarations.Mixin
 
 
 @Declarations.register(Model)
@@ -64,3 +70,4 @@ class PredictionModelCall(Mixin.IdColumn):
     def __repr__(self):
         msg = '<PredictionModelCall call_datetime={self.call_datetime}, prediction_model={self.prediction_model}>'
         return msg.format(self=self)
+

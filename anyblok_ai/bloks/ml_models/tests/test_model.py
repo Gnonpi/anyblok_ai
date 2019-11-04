@@ -3,16 +3,29 @@ import pickle
 from freezegun import freeze_time
 
 
-class TestPredictionModel:
-    def test_create_prediction_model(self, rollback_registry):
-        registry = rollback_registry
-        p_model_count = registry.PredictionModel.query().count()
-        dumb_model = registry.PredictionModel.insert(
-            model_name='dumb prediction model 01',
-            model_file_path='',
-        )
-        assert registry.PredictionModel.query().count() == p_model_count + 1
-        assert dumb_model.model_name == 'dumb prediction model 01'
+def test_create_prediction_model(rollback_registry):
+    registry = rollback_registry
+    p_model_count = registry.PredictionModel.query().count()
+    dumb_model = registry.PredictionModel.insert(
+        model_name='dumb prediction model 01',
+        model_file_path='',
+    )
+    assert registry.PredictionModel.query().count() == p_model_count + 1
+    assert dumb_model.model_name == 'dumb prediction model 01'
+
+
+def test_create_model_executor(rollback_registry):
+    registry = rollback_registry
+    dumb_model = registry.PredictionModel.insert(
+        model_name='dumb prediction model 01',
+        model_file_path='',
+    )
+    p_executor_count = registry.PredictionModelExecutor.query().count()
+    model_executor = registry.PredictionModelExecutor.insert(
+        prediction_model=dumb_model
+    )
+    assert registry.PredictionModelExecutor.query().count() == p_executor_count + 1
+    assert model_executor.prediction_model == dumb_model
 
 
 # defined here to be pickle-able

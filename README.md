@@ -49,6 +49,12 @@ you have to relaunch:
 $ python setup.py install
 ```
 
+When adding a new blok in your package:
+* add the new blok code in the package dunder-init, models, tests, etc...
+* add the entrypoint in the `setup.py`
+* in the test.cfg, add the name to `install_or_update_bloks` entry.
+The name to add is the name of the entrypoint, not the package
+
 --- 
 When using the blok in an application,
 remember to:

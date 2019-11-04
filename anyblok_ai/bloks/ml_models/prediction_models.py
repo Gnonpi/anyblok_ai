@@ -5,6 +5,7 @@ from logging import getLogger
 
 from anyblok import Declarations
 from anyblok.column import String, Text
+from anyblok.relationship import One2One
 
 logger = getLogger(__name__)
 
@@ -14,12 +15,16 @@ Mixin = Declarations.Mixin
 
 @Declarations.register(Model)
 class PredictionModel(Mixin.IdColumn, Mixin.TrackModel):
-    """PredictionModel"""
+    """A stat model takes features in and output a prediction"""
+
     model_name = String(label='Model name', unique=True, nullable=False)
     model_file_path = Text(
         label='Serialized model path',
         nullable=False
-    )
+    )  # todo: find better data type
+
+    def predict(self, features):
+        return self.model_executor.predict(features)
 
     def __str__(self):
         return 'Model {} at {}'.format(self.model_name, self.model_file_path)
@@ -29,36 +34,26 @@ class PredictionModel(Mixin.IdColumn, Mixin.TrackModel):
         return msg.format(self=self)
 
 
-def predict(current_model, features):
+@Declarations.register(Model)
+class PredictionModelExecutor(Mixin.IdColumn):
+    """An executor is the part of the model that really compute
+    Should be extended or overriden in other bloks
     """
-    Function attached to PredictionModel as does the prediction
-    and conserve inputs given+output generated in the DB
-    :param current_model:
-    :param features:
-    :return:
-    """
-    # todo: add more possibilities: tensorflow, h2o
-    logger.info('Starting prediction for {}'.format(current_model.model_name))
-    logger.debug('Loading model from {}'.format(current_model.model_file_path))
-    with open(current_model.model_file_path, 'rb') as f:
-        model = pickle.load(f)
-
-    feature_values = [f['value'] for f in features]
-    output = model.predict(feature_values)
-
-    input_vec = current_model.registry.PredictionInputVector.insert()
-    for i, feature in enumerate(features):
-        current_model.registry.PredictionModelInput.insert(
-            input_order=i,
-            input_name=feature['name'],
-            prediction_model=current_model,
-            input_vector=input_vec
-        )
-    current_model.registry.PredictionModelCall.insert(
-        prediction_model=current_model,
-        prediction_inputs=input_vec,
-        prediction_output=output,
+    prediction_model = One2One(
+        label='Model using the executor',
+        model=PredictionModel,
+        backref='model_executor',
+        nullable=False
     )
-    return output
 
-setattr(PredictionModel, 'predict', predict)
+    def predict(self, features):
+        """Pass the features to the model, let the model run and return its output"""
+        # todo: add more possibilities: tensorflow, h2o
+        logger.info('Starting prediction for {}'.format(self.model_name))
+        logger.debug('Loading model from {}'.format(self.model_file_path))
+        with open(self.model_file_path, 'rb') as f:
+            model = pickle.load(f)
+
+        feature_values = [f['value'] for f in features]
+        output = model.predict(feature_values)
+        return output
