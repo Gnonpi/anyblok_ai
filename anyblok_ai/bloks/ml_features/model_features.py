@@ -21,13 +21,14 @@ class PredictionInputVector(Mixin.IdColumn):
 @Declarations.register(Model)
 class PredictionModelInput(Mixin.IdColumn):
     """Sets of inputs for a model"""
-    input_order = Integer(label='Number in the inputs vector', nullable=False)
-    input_name = String(label='Name of the input', nullable=False)
+    order = Integer(label='Number in the inputs vector', nullable=False)
+    name = String(label='Name of the input', nullable=False)
     is_internal_feature = Boolean(
         label='Is internal feature',
         default=True,
         nullable=False
     )
+    given_value = String(label='Possible given value')
     prediction_model = Many2One(
         label='Model to feed with',
         model=PredictionModel,
@@ -63,7 +64,8 @@ class PredictionModelCall(Mixin.IdColumn):
     prediction_inputs = One2One(
         label='Inputs that produced the output',
         model=PredictionInputVector,
-        backref='inputs'
+        backref='inputs',
+        nullable=False
     )
     prediction_output = String(nullable=False)
 
@@ -71,3 +73,34 @@ class PredictionModelCall(Mixin.IdColumn):
         msg = '<PredictionModelCall call_datetime={self.call_datetime}, prediction_model={self.prediction_model}>'
         return msg.format(self=self)
 
+
+@Declarations.register(Model)
+class PredictionModel:
+    """We override the predict from PredictionModel to use the new predict_and_keep_track
+    """
+    def predict(self, features):
+        return self.model_executor.predict_and_keep_track(features)
+
+
+@Declarations.register(Model)
+class PredictionModelExecutor:
+    def predict_and_keep_track(self, features):
+        current_model = self.prediction_model
+        input_vec = self.registry.PredictionInputVector.insert()
+        for i, feature in enumerate(features):
+            self.registry.PredictionModelInput.insert(
+                order=i,
+                name=feature['name'],
+                given_value=feature['value'],
+                prediction_model=current_model,
+                input_vector=input_vec
+            )
+
+        output = self.predict(features)
+
+        self.registry.PredictionModelCall.insert(
+            prediction_model=current_model,
+            prediction_inputs=input_vec,
+            prediction_output=output,
+        )
+        return output

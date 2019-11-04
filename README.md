@@ -5,9 +5,12 @@ A Blok that allows to add/update/delete/use machine learning models
 ## TODO
 
 Mandatory:
-* [ ] Make the PredictionModels.predict method work
+* [x] Make the PredictionModels.predict method work
 * [ ] Make the predict method create in/out records with ml_features
 * [ ] Test everything
+* [ ] Test cases ml_features is installed or not (check on gitter)
+* [ ] Failures caused by Anyblok should impact the least possible
+the fact that prediction output is returned
 
 Good to have:
 * [ ] More ML libraries supported

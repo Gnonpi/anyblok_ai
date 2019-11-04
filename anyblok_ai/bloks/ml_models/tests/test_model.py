@@ -36,7 +36,7 @@ class FakeModel:
 
 @freeze_time('2019-10-31')
 class TestModelPredict:
-    def test_model_predict_create_instances(self, tmpdir, rollback_registry, mocker):
+    def test_model_predict_basic(self, tmpdir, rollback_registry, mocker):
         registry = rollback_registry
         model_path = tmpdir / 'test-model.pkl'
         expected_output = 10.
