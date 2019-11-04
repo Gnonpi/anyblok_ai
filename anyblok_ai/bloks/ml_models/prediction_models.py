@@ -49,9 +49,11 @@ class PredictionModelExecutor(Mixin.IdColumn):
     def predict(self, features):
         """Pass the features to the model, let the model run and return its output"""
         # todo: add more possibilities: tensorflow, h2o
-        logger.info('Starting prediction for {}'.format(self.model_name))
-        logger.debug('Loading model from {}'.format(self.model_file_path))
-        with open(self.model_file_path, 'rb') as f:
+        model_name = self.prediction_model.model_name
+        model_file_path = self.prediction_model.model_file_path
+        logger.info('Starting prediction for {}'.format(model_name))
+        logger.debug('Loading model from {}'.format(model_file_path))
+        with open(model_file_path, 'rb') as f:
             model = pickle.load(f)
 
         feature_values = [f['value'] for f in features]

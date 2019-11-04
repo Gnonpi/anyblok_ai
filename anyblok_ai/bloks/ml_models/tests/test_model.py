@@ -36,7 +36,7 @@ class FakeModel:
 
 @freeze_time('2019-10-31')
 class TestModelPredict:
-    def test_model_predict_create_instances(self, tmpdir, rollback_registry):
+    def test_model_predict_create_instances(self, tmpdir, rollback_registry, mocker):
         registry = rollback_registry
         model_path = tmpdir / 'test-model.pkl'
         expected_output = 10.
@@ -48,29 +48,16 @@ class TestModelPredict:
             model_name='dumb model',
             model_file_path=str(model_path)
         )
-        p_model_call_count = registry.PredictionModelCall.query().count()
-        p_model_input_a = registry.PredictionModelInput.insert(
-            prediction_model=p_model,
-            input_order=0,
-            input_name='size'
+        p_model_executor = registry.PredictionModelExecutor.insert(
+            prediction_model=p_model
         )
-        p_model_input_b = registry.PredictionModelInput.insert(
-            prediction_model=p_model,
-            input_order=1,
-            input_name='colour'
-        )
+        spy_executor = mocker.spy(p_model_executor, 'predict')
         features = [
             {'name': 'size', 'value': 0.5},
             {'name': 'colour', 'value': 'Blue'}
         ]
         output = p_model.predict(features)
 
-        assert registry.PredictionModelCall.query().count() == p_model_call_count + 1
-        p_model_call = registry.PredictionModelCall.query().filter_by(
-            prediction_model=p_model,
-        )[0]
-        p_model_inputs = registry.PredictionInputVector.query().all()[0]
-        assert p_model_call.prediction_output == expected_output
-        assert p_model_call.prediction_inputs == p_model_inputs
-
         assert output == expected_output
+        spy_executor.assert_called_once_with(features)
+
